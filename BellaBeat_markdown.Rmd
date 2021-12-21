@@ -1,0 +1,127 @@
+---
+title: "BellaBeat"
+author: "Samrita"
+date: "12/10/2021"
+output: powerpoint_presentation
+---
+
+
+```{r setup, include= FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+
+install.packages("tidyverse",repos =" http://cran.us.r-project.org ")
+library(tidyverse)
+
+install.packages("ggplot2")
+library(ggplot2)
+
+install.packages("reshape2", repos =" http://cran.us.r-project.org ") # for melt method
+library(reshape2)
+
+
+# analysis 1 : BMI vs Steps and Calories burnt
+BMI_Analysis<-read.csv("CustomFiles/BMI_Analysis.csv")
+str(BMI_Analysis)
+
+steps_sleep_awake<-read.csv("CustomFiles/Weekday_steps_sleep_awake.csv")
+str(steps_sleep_awake)
+
+date_vs_others<-read.csv("CustomFiles/Date_vs_others.csv")
+str(date_vs_others)
+
+Intensity_Steps<-read.csv("CustomFiles/Steps_Intensity_hourly.csv")
+Intensity_Steps_long<-Intensity_Steps %>% 
+  pivot_longer(cols = c("TotalSteps", "TotalIntensity"), names_to = "Activity")
+str(Intensity_Steps_long)
+
+```
+
+## R Markdown
+
+Bellabeat, a high-tech manufacturer of health-focused products for women. 
+
+Stakeholders:
+
+1. Urška Sršen: Cofounder and Chief Creative Officer
+
+2. Sando Mur: Cofounder and executive team member
+
+3. Bellabeat marketing analytics team
+
+## Problem statement
+- Analyse smart device usage to gain insight.
+- Provide high-level recommendations for Bellabeat’s marketing strategy
+
+## Data Analysis tools
+
+- Data cleaning, processing and analysis is done in BigQuery
+- Data visualisation is done in R studio
+
+## BMI vs Steps and Calories 
+
+```{r analysis1}
+
+ggplot(data = BMI_Analysis, aes(x= avg_BMI)) +
+geom_line(aes(y = avg_Calories, color = 'Calories')) +
+geom_line(aes(y = avg_steps, color = "Steps")) +
+  labs(y = 'Calories and Steps count', x="Average BMI",caption = "**Plot has Average values of all users")
+
+```
+
+## BMI vs Calories burnt, active and sedentary minutes 
+```{r analysis2}
+#Analysis 2: BMI vs Calories burnt, active and sedentary minutes 
+
+ggplot(data = BMI_Analysis, aes(x= avg_BMI)) +
+  geom_line(aes(y = avg_Calories, color = 'Calories burnt')) +
+  geom_line(aes(y = Avg_ActiveMinutes, color = "Active minutes")) +
+  geom_line(aes(y = SedentaryMinutes, color = "Sedentary minutes")) +
+  labs(y = 'Count',x="BMI",caption = "**Plot has Average values of all users")
+```
+
+## Average steps, sleep time vs days of week
+
+```{r analysis3}
+ggplot(data = steps_sleep_awake,) +
+  geom_col(aes(x=reorder(as.character(Date_format),Avg_steps),y = Avg_steps, fill = Avg_sleep_mins))+
+  labs(caption = "**Plot has Average values of all users",x="Weekdays",y=" Steps", fill="Sleep minutes")+
+  theme(axis.text.x = element_text(angle=90))
+```
+
+
+## Average sleep time vs Sedentary minutes
+```{r analysis4}
+ggplot(data=date_vs_others,aes(x=Avg_sleep_mins))+
+  geom_smooth(mapping = aes(y=Sedentary_Active_mins),method = 'loess',formula = y ~ x)
+
+```
+
+
+## Calories burnt vs Active minutes
+```{r analysis5}
+ggplot(data=date_vs_others,aes(x=Total_active_minutes))+
+  geom_smooth(mapping = aes(y=Calories),formula = y ~ x,method = 'loess')+
+  geom_point(mapping = aes(y=Calories))
+```
+  
+## Activity time in a day
+```{r analysis6}
+ggplot(data = Intensity_Steps_long)+
+  geom_bar(aes(x =reorder(Hours,value) , y = value, fill =Activity  ),stat="identity", position = "dodge")+
+  labs(x="Day time",caption="**Average values taken for intensity and steps")
+```
+
+## Conclusion
+
+- We notice only 24 % of users log their weight and BMI details. We must encourage them to enter the same regularly.
+- Only 72% of people tracked their sleep on a daily basis. 
+- Most users tend to get lazy on Sunday. 
+- People looking to burn more calories should spend more time being active rather than sedentary which helps with good sleep.
+- Many users like to walk in the morning and do high intensity activities in the evening or night. 
+
+
+## Recommendation
+- Marketing team should make the customers aware of the benefits of tracking their sleep.
+- so Bellabeat can organize Sunday-Funday walking or running competitions among the users.
+- Collaborate with local gyms for trial sessions for regular premium members. This can be used in     advertisements.
+- Keep a weekly target of walk and high intensity activities, upon reaching refer users for free trial of bellabeat premium membership.
